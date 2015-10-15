@@ -2,9 +2,132 @@ package userstream
 
 import (
 	"encoding/json"
+	//	"github.com/davecgh/go-spew/spew"
 	"github.com/k0kubun/twitter"
 	"strings"
 )
+
+type Record struct {
+	DirectMessage struct {
+		ID     int64  `json:"id"`
+		IDStr  string `json:"id_str"`
+		Text   string `json:"text"`
+		Sender struct {
+			ID          int    `json:"id"`
+			IDStr       string `json:"id_str"`
+			Name        string `json:"name"`
+			ScreenName  string `json:"screen_name"`
+			Location    string `json:"location"`
+			Description string `json:"description"`
+			URL         string `json:"url"`
+			Entities    struct {
+				URL struct {
+					Urls []struct {
+						URL         string `json:"url"`
+						ExpandedURL string `json:"expanded_url"`
+						DisplayURL  string `json:"display_url"`
+						Indices     []int  `json:"indices"`
+					} `json:"urls"`
+				} `json:"url"`
+				Description struct {
+					Urls []interface{} `json:"urls"`
+				} `json:"description"`
+			} `json:"entities"`
+			Protected                      bool   `json:"protected"`
+			FollowersCount                 int    `json:"followers_count"`
+			FriendsCount                   int    `json:"friends_count"`
+			ListedCount                    int    `json:"listed_count"`
+			CreatedAt                      string `json:"created_at"`
+			FavouritesCount                int    `json:"favourites_count"`
+			UtcOffset                      int    `json:"utc_offset"`
+			TimeZone                       string `json:"time_zone"`
+			GeoEnabled                     bool   `json:"geo_enabled"`
+			Verified                       bool   `json:"verified"`
+			StatusesCount                  int    `json:"statuses_count"`
+			Lang                           string `json:"lang"`
+			ContributorsEnabled            bool   `json:"contributors_enabled"`
+			IsTranslator                   bool   `json:"is_translator"`
+			IsTranslationEnabled           bool   `json:"is_translation_enabled"`
+			ProfileBackgroundColor         string `json:"profile_background_color"`
+			ProfileBackgroundImageURL      string `json:"profile_background_image_url"`
+			ProfileBackgroundImageURLHTTPS string `json:"profile_background_image_url_https"`
+			ProfileBackgroundTile          bool   `json:"profile_background_tile"`
+			ProfileImageURL                string `json:"profile_image_url"`
+			ProfileImageURLHTTPS           string `json:"profile_image_url_https"`
+			ProfileBannerURL               string `json:"profile_banner_url"`
+			ProfileLinkColor               string `json:"profile_link_color"`
+			ProfileSidebarBorderColor      string `json:"profile_sidebar_border_color"`
+			ProfileSidebarFillColor        string `json:"profile_sidebar_fill_color"`
+			ProfileTextColor               string `json:"profile_text_color"`
+			ProfileUseBackgroundImage      bool   `json:"profile_use_background_image"`
+			HasExtendedProfile             bool   `json:"has_extended_profile"`
+			DefaultProfile                 bool   `json:"default_profile"`
+			DefaultProfileImage            bool   `json:"default_profile_image"`
+			Following                      bool   `json:"following"`
+			FollowRequestSent              bool   `json:"follow_request_sent"`
+			Notifications                  bool   `json:"notifications"`
+		} `json:"sender"`
+		SenderID         int    `json:"sender_id"`
+		SenderIDStr      string `json:"sender_id_str"`
+		SenderScreenName string `json:"sender_screen_name"`
+		Recipient        struct {
+			ID          int64       `json:"id"`
+			IDStr       string      `json:"id_str"`
+			Name        string      `json:"name"`
+			ScreenName  string      `json:"screen_name"`
+			Location    string      `json:"location"`
+			Description string      `json:"description"`
+			URL         interface{} `json:"url"`
+			Entities    struct {
+				Description struct {
+					Urls []interface{} `json:"urls"`
+				} `json:"description"`
+			} `json:"entities"`
+			Protected                      bool        `json:"protected"`
+			FollowersCount                 int         `json:"followers_count"`
+			FriendsCount                   int         `json:"friends_count"`
+			ListedCount                    int         `json:"listed_count"`
+			CreatedAt                      string      `json:"created_at"`
+			FavouritesCount                int         `json:"favourites_count"`
+			UtcOffset                      interface{} `json:"utc_offset"`
+			TimeZone                       interface{} `json:"time_zone"`
+			GeoEnabled                     bool        `json:"geo_enabled"`
+			Verified                       bool        `json:"verified"`
+			StatusesCount                  int         `json:"statuses_count"`
+			Lang                           string      `json:"lang"`
+			ContributorsEnabled            bool        `json:"contributors_enabled"`
+			IsTranslator                   bool        `json:"is_translator"`
+			IsTranslationEnabled           bool        `json:"is_translation_enabled"`
+			ProfileBackgroundColor         string      `json:"profile_background_color"`
+			ProfileBackgroundImageURL      string      `json:"profile_background_image_url"`
+			ProfileBackgroundImageURLHTTPS string      `json:"profile_background_image_url_https"`
+			ProfileBackgroundTile          bool        `json:"profile_background_tile"`
+			ProfileImageURL                string      `json:"profile_image_url"`
+			ProfileImageURLHTTPS           string      `json:"profile_image_url_https"`
+			ProfileLinkColor               string      `json:"profile_link_color"`
+			ProfileSidebarBorderColor      string      `json:"profile_sidebar_border_color"`
+			ProfileSidebarFillColor        string      `json:"profile_sidebar_fill_color"`
+			ProfileTextColor               string      `json:"profile_text_color"`
+			ProfileUseBackgroundImage      bool        `json:"profile_use_background_image"`
+			HasExtendedProfile             bool        `json:"has_extended_profile"`
+			DefaultProfile                 bool        `json:"default_profile"`
+			DefaultProfileImage            bool        `json:"default_profile_image"`
+			Following                      bool        `json:"following"`
+			FollowRequestSent              bool        `json:"follow_request_sent"`
+			Notifications                  bool        `json:"notifications"`
+		} `json:"recipient"`
+		RecipientID         int64  `json:"recipient_id"`
+		RecipientIDStr      string `json:"recipient_id_str"`
+		RecipientScreenName string `json:"recipient_screen_name"`
+		CreatedAt           string `json:"created_at"`
+		Entities            struct {
+			Hashtags     []interface{} `json:"hashtags"`
+			Symbols      []interface{} `json:"symbols"`
+			UserMentions []interface{} `json:"user_mentions"`
+			Urls         []interface{} `json:"urls"`
+		} `json:"entities"`
+	} `json:"direct_message"`
+}
 
 type FriendList struct {
 	Friends []int64
@@ -57,6 +180,12 @@ func ParseJson(jsonText string) interface{} {
 		tweet := twitter.Tweet{}
 		decoder.Decode(&tweet)
 		return &tweet
+	} else if _, hasKey := hash["direct_message"]; hasKey {
+		dm := Record{}
+		decoder := json.NewDecoder(strings.NewReader(jsonText))
+		decoder.Decode(&dm)
+		//spew.Dump(dm)
+		return &dm
 	}
 	return nil
 }
