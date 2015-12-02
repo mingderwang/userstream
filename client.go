@@ -41,14 +41,14 @@ func (c *Client) UserStream(callback func(interface{})) {
 func (c *Client) FollowUserId(tweetId int64) (*UserDetails, error) {
 	user := UserDetails{}
 	id := fmt.Sprintf("%d", tweetId)
-	url := fmt.Sprintf("/1.1/friendships/create.json")
+	url := fmt.Sprintf("/1.1/friendships/update.json")
 	fmt.Println(url)
 	fmt.Println(id)
 	response, err := c.post(
 		c.apiUrl(url),
 		map[string]string{
-			"user_id": "1401881",
-			"follow":  "true",
+			"user_id":  id,
+			"retweets": "true",
 		},
 	)
 	if err != nil {
